@@ -1,7 +1,9 @@
 import * as React from "react";
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import Nav from "../components/Nav";
+import { useAuth } from "../authentication/auth";
+import { authservice } from "../services";
 
 
 interface DataRegister {
@@ -11,12 +13,23 @@ interface DataRegister {
 }
 
 export const Register = () => {
-
+    const [err, setErr] = React.useState<boolean>(false);
     const [registed, setRegisted] = React.useState<boolean>(false);
-  
+  const {token} = useAuth();
     const { handleSubmit, register } = useForm<DataRegister>();
     const onSubmit = async (data: DataRegister) => {
-       console.log(data)
+       setErr(false)
+       const res = await authservice.register(data.name, data.email, data.password);
+       setErr(!res)
+       if (res) {
+           setRegisted(true)
+       }
+    }
+    if (token) {
+        return <Redirect to="/" />;
+    }
+    if (registed) {
+        return <Redirect to="/login" />;
     }
     
 
